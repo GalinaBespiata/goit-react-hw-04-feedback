@@ -1,70 +1,70 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { Section } from './Section/Section.jsx';
 import { Statistics } from '../components/Statistics/Statistics.jsx';
 import { RenderBtn } from '../components/FeedBackBtnBlock/FeedBackBtnBlock';
 import { Notifications } from 'Notifications/Notifications.jsx';
 
-export class App extends Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
+export function App() {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+
+  const onLeaveFeedback = evt => {
+    switch (evt) {
+      case 'good':
+        setGood(prevState => prevState + 1);
+        break;
+      case 'neutral':
+        setNeutral(prevState => prevState + 1);
+        break;
+      case 'bad':
+        setBad(prevState => prevState + 1);
+        break;
+      default:
+        return;
+    }
   };
 
-  onLeaveFeedback = btnName => {
-    this.setState(prevState => {
-      return { [btnName]: prevState[btnName] + 1 };
-    });
+  const countTotalFeedback = () => {
+    return good + neutral + bad;
   };
 
-  countTotalFeedback(objState) {
-    const arrValues = Object.values(this.state);
-    let totalFeedback = 0;
-    arrValues.map(el => (totalFeedback += el));
-    return totalFeedback;
-  }
-
-  countPositiveFeedbackPercentage(total) {
-    const percentage = Math.ceil(
-      (this.state.good / this.countTotalFeedback()) * 100
-    );
-
+  const countPositiveFeedbackPercentage = () => {
+    const percentage = Math.ceil((good / countTotalFeedback()) * 100);
     return percentage;
-  }
+  };
 
-  render() {
-    return (
-      <div
-        style={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: 40,
-          color: '#010101',
-        }}
-      >
-        <Section title="" RenderBtn>
-          <RenderBtn
-            options={Object.keys(this.state)}
-            onLeaveFeedback={this.onLeaveFeedback}
+  return (
+    <div
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: 40,
+        color: '#010101',
+      }}
+    >
+      <Section title="" RenderBtn>
+        <RenderBtn
+          options={['good', 'neutral', 'bad']}
+          onLeaveFeedback={onLeaveFeedback}
+        />
+      </Section>
+      <Section title="Statistics" Statistics>
+        {countTotalFeedback() ? (
+          <Statistics
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            total={countTotalFeedback()}
+            percentageGood={countPositiveFeedbackPercentage()}
           />
-        </Section>
-        <Section title="Statistics" Statistics>
-          {this.countTotalFeedback() ? (
-            <Statistics
-              good={this.state.good}
-              neutral={this.state.neutral}
-              bad={this.state.bad}
-              total={this.countTotalFeedback()}
-              percentageGood={this.countPositiveFeedbackPercentage()}
-            />
-          ) : (
-            <Notifications />
-          )}
-        </Section>
-      </div>
-    );
-  }
+        ) : (
+          <Notifications />
+        )}
+      </Section>
+    </div>
+  );
 }
